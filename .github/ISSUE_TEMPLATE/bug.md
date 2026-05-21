@@ -5,6 +5,12 @@ title: "[bug] "
 labels: bug
 ---
 
+## Privacy first
+
+Do not paste real bank statements, transaction rows, balances, emails, API keys, database URLs, tokens, `.env` files, or screenshots that show personal financial data. Use fake/sample data only.
+
+For vulnerabilities or leaked secrets, use GitHub private vulnerability reporting instead of a public issue.
+
 ## What happened
 
 <!-- Concise description of the bug. -->
@@ -29,4 +35,4 @@ labels: bug
 
 ## Logs / screenshots
 
-<!-- Redact any PII before pasting. -->
+<!-- Use synthetic data only. Redact names, balances, account numbers, emails, URLs, tokens, and file contents. -->

@@ -2,6 +2,10 @@
 
 <!-- 1-3 sentences. What does this PR do and why? -->
 
+## Privacy first
+
+<!-- Do not include real financial data, production logs, screenshots with balances/emails, API keys, database URLs, tokens, `.env` files, or customer/user data. Use synthetic fixtures only. -->
+
 ## Changes
 
 <!-- Bulleted list of the concrete changes. -->
@@ -25,7 +29,9 @@
 - [ ] `bun run lint` passes
 - [ ] `bun run build` passes
 - [ ] Migrations (if any) are idempotent and in `scripts/`
-- [ ] No secrets, no PII, no `console.log` left in production code
+- [ ] No secrets, `.env*` files, database exports, Vercel/Neon/OpenAI tokens, or personal financial data
+- [ ] Tests, fixtures, screenshots, and docs use synthetic data only
+- [ ] No `console.log` left in production code unless gated behind an explicit debug flag
 - [ ] Linked the related issue with `Closes #N` if applicable
 
 ## Screenshots / demo

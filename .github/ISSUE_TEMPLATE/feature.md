@@ -5,6 +5,10 @@ title: "[feat] "
 labels: enhancement
 ---
 
+## Privacy first
+
+Do not include real bank statements, transaction data, balances, emails, API keys, database URLs, tokens, `.env` files, or screenshots with personal financial data. Use fake/sample data only.
+
 ## Problem
 
 <!-- What problem does this solve? Who is affected? -->

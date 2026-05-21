@@ -11,6 +11,7 @@ import { clearDemoTransactions } from "@/lib/demo-data";
 import { decideEscalation, pickBestResult } from "@/lib/import-escalation";
 import { detectStandardFormat, parseStandardFormat } from "@/lib/standard-parsers";
 import { recordImportEvent, normaliseBankFromFormat } from "@/lib/import-telemetry";
+import { debugImport } from "@/lib/debug";
 
 // Allow maximum serverless execution time (60s Hobby, 300s Pro)
 export const maxDuration = 300;
@@ -80,16 +81,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Una de las páginas del PDF es demasiado grande para analizar con IA." }, { status: 413 });
     }
 
-    // Log payload size for monitoring (Vercel enforces its own body limits)
+    // Debug payload size only when explicitly enabled.
     const imagesSize = pageImages ? pageImages.reduce((sum, img) => sum + img.length, 0) : 0;
     const payloadSize = (pdfBase64?.length ?? 0) + (excelBase64?.length ?? 0) + (csvText?.length ?? 0) + imagesSize;
-    console.log(`[import] Payload size: ${(payloadSize / 1024).toFixed(0)}KB (images: ${(imagesSize / 1024).toFixed(0)}KB)`);
+    debugImport(`[import] Payload size: ${(payloadSize / 1024).toFixed(0)}KB (images: ${(imagesSize / 1024).toFixed(0)}KB)`);
 
     // Parse CSV, PDF or Excel
     let parseResult: ParseResult | null = null;
     let parseErrorMsg = "";
     const fileType = excelBase64 ? "excel" : pdfBase64 ? "pdf" : "csv";
-    console.log(`[import] Processing file: type=${fileType}, format=${format}, hasOpenAI=${!!process.env.OPENAI_API_KEY}, v=3`);
+    debugImport(`[import] Processing file: type=${fileType}, format=${format}, aiConfigured=${!!process.env.OPENAI_API_KEY}, v=3`);
     try {
       if (excelBase64) {
         const buffer = Buffer.from(excelBase64, "base64");
@@ -101,9 +102,9 @@ export async function POST(req: NextRequest) {
         if (!isZip && !isOLE) {
           return NextResponse.json({ error: "El archivo no parece un Excel válido" }, { status: 400 });
         }
-        console.log(`[import] Excel buffer size: ${buffer.length} bytes`);
+        debugImport(`[import] Excel buffer size: ${buffer.length} bytes`);
         parseResult = parseExcel(buffer);
-        console.log(`[import] Excel parse result: ${parseResult.transactions.length} transactions, format=${parseResult.format}`);
+        debugImport(`[import] Excel parse result: ${parseResult.transactions.length} transactions, format=${parseResult.format}`);
       } else if (pdfBase64) {
         const buffer = Buffer.from(pdfBase64, "base64");
         // Magic bytes: "%PDF" (25 50 44 46). Rechazamos payloads arbitrarios
@@ -112,17 +113,17 @@ export async function POST(req: NextRequest) {
         if (!isPDF) {
           return NextResponse.json({ error: "El archivo no parece un PDF válido" }, { status: 400 });
         }
-        console.log(`[import] PDF buffer size: ${buffer.length} bytes`);
+        debugImport(`[import] PDF buffer size: ${buffer.length} bytes`);
         parseResult = await parseBankPDF(buffer);
-        console.log(`[import] PDF parse result: ${parseResult.transactions.length} transactions, format=${parseResult.format}`);
+        debugImport(`[import] PDF parse result: ${parseResult.transactions.length} transactions, format=${parseResult.format}`);
       } else if (csvText) {
         // Before regular CSV parsing, sniff for open banking formats (OFX/QIF/CAMT.053/MT940).
         // These are cross-bank standards — we parse them without any AI or bank-specific code.
         const standardFormat = detectStandardFormat(csvText);
         if (standardFormat) {
-          console.log(`[import] Detected standard format: ${standardFormat}`);
+          debugImport(`[import] Detected standard format: ${standardFormat}`);
           parseResult = parseStandardFormat(csvText, standardFormat);
-          console.log(`[import] ${standardFormat} parse result: ${parseResult.transactions.length} transactions`);
+          debugImport(`[import] ${standardFormat} parse result: ${parseResult.transactions.length} transactions`);
         } else if (format === "generic" && mapping) {
           parseResult = (await import("@/lib/csv-parser")).parseGeneric(csvText, mapping);
         } else {
@@ -162,7 +163,7 @@ export async function POST(req: NextRequest) {
       const structuredTxCount = parseResult?.transactions.length ?? 0;
       const context = !parseResult ? `parser crashed: ${parseErrorMsg}`
         : `format=${parseResult.format}, structuredTx=${structuredTxCount}, weak=${parseResult.weakDetection === true}`;
-      console.log(`[import] Escalating to AI fallback — reason=${decision.reason}, ${context}`);
+      debugImport(`[import] Escalating to AI fallback — reason=${decision.reason}, ${context}`);
 
       const structuredResult = parseResult;
       let aiResult: ParseResult | null = null;
@@ -170,11 +171,11 @@ export async function POST(req: NextRequest) {
       // Step 1: Vision AI (most accurate for PDFs, when page images are available)
       if (pageImages && pageImages.length > 0) {
         try {
-          console.log(`[import] Vision AI: ${pageImages.length} page images`);
+          debugImport(`[import] Vision AI: ${pageImages.length} page images`);
           const { parseWithVision } = await import("@/lib/ai-pdf-vision");
           const visionResult = await parseWithVision(pageImages);
           if (visionResult.transactions.length > 0) {
-            console.log(`[import] Vision AI extracted ${visionResult.transactions.length} transactions`);
+            debugImport(`[import] Vision AI extracted ${visionResult.transactions.length} transactions`);
             aiResult = visionResult;
           }
         } catch (visionErr) {
@@ -209,7 +210,7 @@ export async function POST(req: NextRequest) {
             const detectedFormat = structuredResult?.format ?? format ?? fileType;
             const textAIResult = await parseWithAI(rawContent, detectedFormat);
             if (textAIResult.transactions.length > (aiResult?.transactions.length ?? 0)) {
-              console.log(`[import] Text AI extracted ${textAIResult.transactions.length} transactions`);
+              debugImport(`[import] Text AI extracted ${textAIResult.transactions.length} transactions`);
               aiResult = textAIResult;
             }
           }
@@ -328,7 +329,7 @@ export async function POST(req: NextRequest) {
 
     if (shouldAICategorize) {
       try {
-        console.log(`[import] AI categorizing ${uncategorized.length} transactions (action=${action})`);
+        debugImport(`[import] AI categorizing ${uncategorized.length} transactions (action=${action})`);
         const aiResults = await categorizeTransactions(
           uncategorized.map((t) => ({
             description: t.transaction.description,
@@ -358,7 +359,7 @@ export async function POST(req: NextRequest) {
         // Continue without AI — transactions stay uncategorized but import still works
       }
     } else if (uncategorized.length > 100 && action === "preview") {
-      console.log(`[import] Skipping AI categorization for preview (${uncategorized.length} uncategorized — too many)`);
+      debugImport(`[import] Skipping AI categorization for preview (${uncategorized.length} uncategorized - too many)`);
     }
 
     if (action === "preview") {

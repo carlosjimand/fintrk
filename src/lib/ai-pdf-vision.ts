@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import type { ParsedTransaction, ParseResult } from "./csv-parser";
 import { AI_VISION_MODEL, isGPT5Family } from "./ai-models";
+import { debugImport } from "./debug";
 
 let _client: OpenAI | null = null;
 function getClient(): OpenAI {
@@ -49,7 +50,7 @@ export async function parseWithVision(pageImages: string[]): Promise<ParseResult
     batches.push(pageImages.slice(i, i + MAX_PAGES_PER_CALL));
   }
 
-  console.log(`[ai-vision] Processing ${pageImages.length} pages in ${batches.length} batch(es)`);
+  debugImport(`[ai-vision] Processing ${pageImages.length} pages in ${batches.length} batch(es)`);
 
   // Process batches with controlled concurrency
   for (let batchStart = 0; batchStart < batches.length; batchStart += MAX_CONCURRENT) {
@@ -86,7 +87,7 @@ export async function parseWithVision(pageImages: string[]): Promise<ParseResult
     deduped.push(tx);
   }
   const dropped = allTransactions.length - deduped.length;
-  if (dropped > 0) console.log(`[ai-vision] Deduplicated ${dropped} cross-batch duplicates`);
+  if (dropped > 0) debugImport(`[ai-vision] Deduplicated ${dropped} cross-batch duplicates`);
 
   // Consistency check: do the extracted transactions reconcile with the reported balances?
   let consistency = checkConsistency(deduped, statementBalance);
@@ -122,11 +123,11 @@ export async function parseWithVision(pageImages: string[]): Promise<ParseResult
       console.warn(`[ai-vision] Consistency still FAILS after retry: ${consistency.reason}`);
       errors.push(`AVISO: ${consistency.reason}. Revisa antes de importar.`);
     } else {
-      console.log(`[ai-vision] Consistency OK after strict retry (${merged.length} txs total)`);
+      debugImport(`[ai-vision] Consistency OK after strict retry (${merged.length} txs total)`);
     }
   }
 
-  console.log(`[ai-vision] Total: ${finalTxs.length} transactions from ${pageImages.length} pages (consistency: ${consistency.ok ? "ok" : "fail"}${retriedOnce ? ", retried" : ""})`);
+  debugImport(`[ai-vision] Total: ${finalTxs.length} transactions from ${pageImages.length} pages (consistency: ${consistency.ok ? "ok" : "fail"}${retriedOnce ? ", retried" : ""})`);
 
   // Build finalBalances for the UI to pre-fill "balance actual"
   const finalBalances = statementBalance.closing !== undefined
@@ -340,7 +341,7 @@ JSON: {
       if (typeof balanceRaw.currency === "string") balance.currency = balanceRaw.currency.toUpperCase();
     }
 
-    console.log(`[ai-vision] Batch ${batchNum}/${totalBatches}${strict ? " (retry)" : ""}: ${transactions.length} transactions from ${pageCount} pages${balance.closing !== undefined ? ` (closing balance ${balance.closing})` : ""}`);
+    debugImport(`[ai-vision] Batch ${batchNum}/${totalBatches}${strict ? " (retry)" : ""}: ${transactions.length} transactions from ${pageCount} pages${balance.closing !== undefined ? " (closing balance present)" : ""}`);
     return { transactions, errors: [], balance, errorThrown: false };
   } catch (err) {
     console.error(`[ai-vision] Batch ${batchNum}/${totalBatches}${strict ? " (retry)" : ""} failed:`, err);

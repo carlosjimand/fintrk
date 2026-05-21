@@ -58,3 +58,14 @@ If you deploy your own instance of Fintrk:
 - Configure `Strict-Transport-Security` and a strict CSP (defaults in `next.config.ts` are a starting point)
 - Rotate `OPENAI_API_KEY` periodically and set spending caps in the OpenAI dashboard
 - Back up your database off-site
+
+## Public repository hygiene
+
+If you fork or maintain a public copy:
+
+- Keep all credentials in environment variables, never in commits, issues, PRs, screenshots, logs, or fixtures
+- Use synthetic transaction data only
+- Enable GitHub secret scanning, push protection, Dependabot alerts, and private vulnerability reporting
+- Rotate any secret that was pasted into a public place, even if it was deleted later
+
+See [`docs/PUBLIC_REPO_SAFETY.md`](docs/PUBLIC_REPO_SAFETY.md) for the short checklist.

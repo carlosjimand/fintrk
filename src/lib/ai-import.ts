@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import type { ParsedTransaction, ParseResult } from "./csv-parser";
 import { AI_PARSE_MODEL, isGPT5Family } from "./ai-models";
+import { debugImport } from "./debug";
 
 let _client: OpenAI | null = null;
 function getClient(): OpenAI {
@@ -40,7 +41,7 @@ export async function parseWithAI(rawText: string, detectedFormat?: string): Pro
     batches.push(dataLines.slice(i, i + BATCH_SIZE));
   }
 
-  console.log(`[ai-import] Processing ${dataLines.length} data lines in ${batches.length} batch(es), format hint: ${detectedFormat ?? "none"}`);
+  debugImport(`[ai-import] Processing ${dataLines.length} data lines in ${batches.length} batch(es), format hint: ${detectedFormat ?? "none"}`);
 
   // Process batches with controlled concurrency
   const allTransactions: ParsedTransaction[] = [];
@@ -59,7 +60,7 @@ export async function parseWithAI(rawText: string, detectedFormat?: string): Pro
     }
   }
 
-  console.log(`[ai-import] Total extracted: ${allTransactions.length} transactions from ${batches.length} batch(es)`);
+  debugImport(`[ai-import] Total extracted: ${allTransactions.length} transactions from ${batches.length} batch(es)`);
 
   return {
     transactions: allTransactions,
@@ -206,7 +207,7 @@ JSON: {"transactions": [{"date":"YYYY-MM-DD","description":"...","amount":123.45
       });
     }
 
-    console.log(`[ai-import] Batch ${batchNum}/${totalBatches}${strict ? " (retry)" : ""}: ${transactions.length} transactions from ${dataLines.length} lines`);
+    debugImport(`[ai-import] Batch ${batchNum}/${totalBatches}${strict ? " (retry)" : ""}: ${transactions.length} transactions from ${dataLines.length} lines`);
     return { transactions, errors: [], errorThrown: false };
   } catch (err) {
     console.error(`[ai-import] Batch ${batchNum}/${totalBatches}${strict ? " (retry)" : ""} failed:`, err);

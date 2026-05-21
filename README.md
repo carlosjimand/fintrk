@@ -93,6 +93,8 @@ Issues and PRs are welcome. Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) and
 
 If you discover a vulnerability, please follow the disclosure process described in [`SECURITY.md`](SECURITY.md) — do not open a public issue.
 
+If you fork or publish changes, read [`docs/PUBLIC_REPO_SAFETY.md`](docs/PUBLIC_REPO_SAFETY.md) before adding examples, screenshots, logs, or import fixtures.
+
 ## License
 
 MIT. See [`LICENSE`](LICENSE).

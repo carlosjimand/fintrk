@@ -1,5 +1,6 @@
 import type { ParsedTransaction, ParseResult } from "./csv-parser";
 import { isRevolutInternal } from "./csv-parser";
+import { debugImport } from "./debug";
 
 // Spanish month abbreviations → month number (0-indexed)
 const MONTHS: Record<string, number> = {
@@ -895,7 +896,7 @@ export async function parseBankPDF(pdfBuffer: Buffer): Promise<ParseResult> {
       // skip the generic regex parser entirely (it picks up garbage for these
       // bank layouts, e.g. a single balance row from Santander).
       if (BANKS_WITHOUT_PDF_PARSER.has(bank)) {
-        console.log(`[pdf-parser] Detected ${bank} but no dedicated parser — routing to AI fallback`);
+        debugImport(`[pdf-parser] Detected ${bank} but no dedicated parser - routing to AI fallback`);
         return {
           transactions: [],
           format: `${bank}-pdf`,

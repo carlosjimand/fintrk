@@ -1,4 +1,5 @@
 import * as XLSX from "xlsx";
+import { debugImport } from "./debug";
 
 export interface ParsedTransaction {
   date: string;
@@ -442,29 +443,19 @@ export function parseExcel(buffer: Buffer): ParseResult {
 
   const sheet = workbook.Sheets[sheetName];
 
-  // Debug: log first few rows to understand the file structure
   const debugRange = XLSX.utils.decode_range(sheet["!ref"] || "A1");
-  console.log(`[excel-parser] Sheet "${sheetName}" range: ${sheet["!ref"]}, rows: ${debugRange.e.r + 1}, cols: ${debugRange.e.c + 1}`);
-  for (let r = 0; r <= Math.min(debugRange.e.r, 5); r++) {
-    const cells: string[] = [];
-    for (let c = 0; c <= Math.min(debugRange.e.c, 10); c++) {
-      const addr = XLSX.utils.encode_cell({ r, c });
-      const cell = sheet[addr];
-      cells.push(cell ? `${String(cell.v).slice(0, 30)}` : "");
-    }
-    console.log(`[excel-parser] Row ${r}: [${cells.join(" | ")}]`);
-  }
+  debugImport(`[excel-parser] Sheet "${sheetName}" range: ${sheet["!ref"]}, rows: ${debugRange.e.r + 1}, cols: ${debugRange.e.c + 1}`);
 
   // Step 1: Scan for header row (doesn't assume row 1)
   const headerInfo = findHeaderRow(sheet);
   if (!headerInfo) {
-    console.log("[excel-parser] No header row found, trying fallback...");
+    debugImport("[excel-parser] No header row found, trying fallback...");
     // Fallback: try sheet_to_json with row 0 as headers
     return parseExcelFallback(sheet);
   }
 
   const { headers, headerRowIndex } = headerInfo;
-  console.log(`[excel-parser] Header row ${headerRowIndex}: [${headers.join(" | ")}]`);
+  debugImport(`[excel-parser] Header row ${headerRowIndex}: ${headers.filter(Boolean).length} columns`);
 
   // Step 2: Detect if this is a known bank
   const bank = detectBank(headers);
@@ -472,7 +463,7 @@ export function parseExcel(buffer: Buffer): ParseResult {
   const account = bank?.account ?? undefined;
   // Track low-confidence paths so the API layer can escalate to AI fallback.
   let weakDetection = !bank; // no bank recognised → always weak
-  console.log(`[excel-parser] Detected bank: ${bank?.name ?? "unknown"}, format: ${format}`);
+  debugImport(`[excel-parser] Detected bank: ${bank?.name ?? "unknown"}, format: ${format}`);
 
   // Step 3: Map columns
   let dateIdx: number;
@@ -488,7 +479,7 @@ export function parseExcel(buffer: Buffer): ParseResult {
   if (bank) {
     dateIdx = findColIndex(headers, bank.dateCol);
     amountIdx = findColIndex(headers, bank.amountCol);
-    console.log(`[excel-parser] Bank ${bank.name}: dateIdx=${dateIdx}, amountIdx=${amountIdx}`);
+    debugImport(`[excel-parser] Bank ${bank.name}: dateIdx=${dateIdx}, amountIdx=${amountIdx}`);
     if (bank.currencyCol) currencyIdx = findColIndex(headers, bank.currencyCol);
     if (bank.debitCol) debitIdx = findColIndex(headers, bank.debitCol);
     if (bank.creditCol) creditIdx = findColIndex(headers, bank.creditCol);
@@ -518,8 +509,7 @@ export function parseExcel(buffer: Buffer): ParseResult {
 
   // If we can't find critical columns, try broader search before giving up
   if (dateIdx < 0) {
-    console.log(`[excel-parser] Date column not found via bank/patterns, trying broad search...`);
-    console.log(`[excel-parser] Headers for broad search: ${JSON.stringify(headers)}`);
+    debugImport("[excel-parser] Date column not found via bank/patterns, trying broad search...");
     // Try any column that contains "fecha" or "date" or "f." (for "f. valor")
     const broadDateIdx = headers.findIndex((h) => {
       const hs = stripAccents(h);
@@ -531,9 +521,9 @@ export function parseExcel(buffer: Buffer): ParseResult {
     if (broadDateIdx >= 0) {
       dateIdx = broadDateIdx;
       weakDetection = true; // broad search = low confidence, escalate
-      console.log(`[excel-parser] Found date via broad search at index ${dateIdx}: "${headers[dateIdx]}"`);
+      debugImport(`[excel-parser] Found date via broad search at index ${dateIdx}`);
     } else {
-      console.log(`[excel-parser] FAILED to find date column. All headers: ${JSON.stringify(headers)}`);
+      debugImport("[excel-parser] Failed to find date column");
       return {
         format,
         transactions: [],
@@ -684,7 +674,7 @@ export function parseExcel(buffer: Buffer): ParseResult {
 
   // If we found headers but 0 transactions, try the fallback parser
   if (transactions.length === 0) {
-    console.log(`[excel-parser] 0 transactions with bank=${bank?.name ?? "generic"}, headers=[${headers.filter(h => h).join(", ")}], trying fallback...`);
+    debugImport(`[excel-parser] 0 transactions with bank=${bank?.name ?? "generic"}, trying fallback...`);
     const fallback = parseExcelFallback(sheet);
     if (fallback.transactions.length > 0) {
       return { ...fallback, format: format || fallback.format, weakDetection: true };
