@@ -15,6 +15,12 @@ import { recordImportEvent, normaliseBankFromFormat } from "@/lib/import-telemet
 // Allow maximum serverless execution time (60s Hobby, 300s Pro)
 export const maxDuration = 300;
 
+const MAX_CSV_CHARS = 2 * 1024 * 1024;
+const MAX_EXCEL_BYTES = 5 * 1024 * 1024;
+const MAX_PDF_BYTES = 15 * 1024 * 1024;
+const MAX_PAGE_IMAGES = 12;
+const MAX_PAGE_IMAGE_BASE64_CHARS = 6 * 1024 * 1024;
+
 export async function POST(req: NextRequest) {
   const startedAt = Date.now();
   // Telemetry captured as we go — flushed at every return path below.
@@ -56,6 +62,22 @@ export async function POST(req: NextRequest) {
 
     if (!csvText && !pdfBase64 && !excelBase64) {
       return NextResponse.json({ error: "Sube un archivo CSV, PDF o Excel para importar." }, { status: 400 });
+    }
+
+    if (csvText && csvText.length > MAX_CSV_CHARS) {
+      return NextResponse.json({ error: "El CSV es demasiado grande. Usa un extracto más pequeño." }, { status: 413 });
+    }
+    if (excelBase64 && Math.ceil(excelBase64.length * 0.75) > MAX_EXCEL_BYTES) {
+      return NextResponse.json({ error: "El Excel es demasiado grande. Usa un archivo de hasta 5 MB." }, { status: 413 });
+    }
+    if (pdfBase64 && Math.ceil(pdfBase64.length * 0.75) > MAX_PDF_BYTES) {
+      return NextResponse.json({ error: "El PDF es demasiado grande. Usa un archivo de hasta 15 MB." }, { status: 413 });
+    }
+    if (pageImages && pageImages.length > MAX_PAGE_IMAGES) {
+      return NextResponse.json({ error: "El PDF tiene demasiadas páginas para analizar con IA." }, { status: 413 });
+    }
+    if (pageImages?.some((img) => img.length > MAX_PAGE_IMAGE_BASE64_CHARS)) {
+      return NextResponse.json({ error: "Una de las páginas del PDF es demasiado grande para analizar con IA." }, { status: 413 });
     }
 
     // Log payload size for monitoring (Vercel enforces its own body limits)

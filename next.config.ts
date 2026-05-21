@@ -2,6 +2,7 @@ import withSerwistInit from "@serwist/next";
 import type { NextConfig } from "next";
 
 const isDev = process.env.NODE_ENV === "development";
+const appOrigin = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
 
 const withSerwist = withSerwistInit({
   swSrc: "src/app/sw.ts",
@@ -44,6 +45,8 @@ const nextConfig: NextConfig = {
         { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
         { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
         { key: "Origin-Agent-Cluster", value: "?1" },
+        { key: "Access-Control-Allow-Origin", value: appOrigin },
+        { key: "Vary", value: "Origin" },
         {
           key: "Permissions-Policy",
           value: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()",
