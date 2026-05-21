@@ -15,7 +15,7 @@ const content = {
     sections: [
       {
         title: "1. Aceptacion de los Terminos",
-        body: "Al acceder o usar fintrk.app, aceptas estos Terminos de Servicio. Si no estas de acuerdo, no uses el servicio. El uso continuado despues de cualquier cambio implica la aceptacion de los terminos actualizados.",
+        body: "Al acceder o usar fintrk, aceptas estos Terminos de Servicio. Si no estas de acuerdo, no uses el servicio. El uso continuado despues de cualquier cambio implica la aceptacion de los terminos actualizados.",
       },
       {
         title: "2. Descripcion del Servicio",
@@ -86,7 +86,7 @@ const content = {
     sections: [
       {
         title: "1. Acceptance of Terms",
-        body: "By accessing or using fintrk.app, you agree to these Terms of Service. If you do not agree, do not use the service. Continued use after any changes implies acceptance of the updated terms.",
+        body: "By accessing or using fintrk, you agree to these Terms of Service. If you do not agree, do not use the service. Continued use after any changes implies acceptance of the updated terms.",
       },
       {
         title: "2. Description of Service",

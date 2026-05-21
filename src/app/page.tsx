@@ -103,7 +103,12 @@ export default function LandingPage() {
                 </button>
               ))}
             </div>
-            {/* Login link hidden — users access via /login directly */}
+            <a
+              href="/gate/e"
+              className="inline-flex items-center rounded-xl border border-[#DDE3DF] bg-white px-3.5 py-2 text-sm font-semibold text-[#1A1A1A] hover:border-[#2D6A4F]/40 hover:text-[#2D6A4F] active:scale-[0.97] transition-all"
+            >
+              {locale === "es" ? "Iniciar sesión" : "Log in"}
+            </a>
             {/* Desktop CTA */}
             <a
               href="#waitlist"
@@ -143,12 +148,20 @@ export default function LandingPage() {
             : "translate-y-full opacity-0"
         }`}
       >
-        <a
-          href="#waitlist"
-          className="block w-full text-center rounded-xl bg-[#2D6A4F] px-5 py-3.5 text-sm font-semibold text-white active:scale-[0.98] transition-transform"
-        >
-          {t.nav.waitlistCta}
-        </a>
+        <div className="grid grid-cols-2 gap-3">
+          <a
+            href="/gate/e"
+            className="block w-full text-center rounded-xl border border-[#DDE3DF] bg-white px-4 py-3.5 text-sm font-semibold text-[#1A1A1A] active:scale-[0.98] transition-transform"
+          >
+            {locale === "es" ? "Iniciar sesión" : "Log in"}
+          </a>
+          <a
+            href="#waitlist"
+            className="block w-full text-center rounded-xl bg-[#2D6A4F] px-4 py-3.5 text-sm font-semibold text-white active:scale-[0.98] transition-transform"
+          >
+            {t.nav.waitlistCta}
+          </a>
+        </div>
       </div>
     </div>
   );

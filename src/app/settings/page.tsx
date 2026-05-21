@@ -91,7 +91,7 @@ export default function SettingsPage() {
       html.removeAttribute("data-font-scale");
       localStorage.removeItem("fintrk.fontScale");
     } else {
-      html.dataset.fontScale = next;
+      html.setAttribute("data-font-scale", next);
       localStorage.setItem("fintrk.fontScale", next);
     }
     haptic.tap();

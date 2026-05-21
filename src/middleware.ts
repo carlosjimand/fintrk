@@ -7,25 +7,31 @@ const JWT_SECRET = new TextEncoder().encode(jwtSecret);
 
 const COOKIE_NAME = "ft_session";
 
-// Allowed origins for CORS (native app + web).
-// Forks: extend via env var ALLOWED_ORIGINS (comma-separated). The defaults
-// always include the Capacitor / local-dev origins so the iOS WebView works
-// out of the box.
+function originFromUrl(url: string | undefined): string | null {
+  if (!url) return null;
+  try {
+    return new URL(url).origin;
+  } catch {
+    return null;
+  }
+}
+
+// Allowed origins for CORS (native app + web). Production web origins are
+// explicit config, not hardcoded source values.
 const DEFAULT_ALLOWED_ORIGINS = [
   "capacitor://localhost",
   "ionic://localhost",
   "http://localhost",
   "http://localhost:3000",
-  "https://fintrk.app",
-  "https://www.fintrk.app",
 ];
 const ALLOWED_ORIGINS = [
   ...DEFAULT_ALLOWED_ORIGINS,
+  originFromUrl(process.env.NEXT_PUBLIC_APP_URL),
   ...(process.env.ALLOWED_ORIGINS ?? "")
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean),
-];
+].filter(Boolean) as string[];
 
 // Routes that don't require authentication
 const PUBLIC_ROUTES = ["/", "/login", "/register", "/gate/e", "/gate/n", "/onboarding", "/offline", "/privacy", "/terms", "/welcome", "/screenshots"];
@@ -93,8 +99,7 @@ export async function middleware(request: NextRequest) {
   //
   // Salta el check cuando:
   // - hay Authorization header (native app ya autenticada),
-  // - O el Origin está explícitamente en ALLOWED_ORIGINS (capacitor://localhost,
-  //   ionic://localhost, http://localhost, https://fintrk.app, etc.) — esto
+  // - O el Origin está explícitamente en ALLOWED_ORIGINS — esto
   //   cubre el primer POST /api/auth/login desde la app nativa, que NO puede
   //   tener Authorization header todavía porque el token nace en la respuesta.
   //

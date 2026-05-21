@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import { SUPPORT_EMAIL } from "@/lib/owner";
+import { appUrl } from "@/lib/site-url";
 
 let _resend: Resend | null = null;
 
@@ -48,7 +49,7 @@ function wrapper(title: string, body: string, cta?: { label: string; href: strin
           <hr style="border:none;border-top:1px solid #eee;margin:32px 0 16px 0;" />
           <p style="font-size:12px;color:#888;line-height:1.5;">
             Open source on GitHub. Si este email no te encaja, responde a este mismo correo.<br/>
-            <a href="https://fintrk.app/privacy" style="color:#2D6A4F;text-decoration:none;">Política de privacidad</a>
+            <a href="${appUrl("/privacy")}" style="color:#2D6A4F;text-decoration:none;">Política de privacidad</a>
           </p>
         </td></tr>
       </table>
@@ -76,7 +77,7 @@ export async function sendWelcomeEmail(params: { to: string; name?: string | nul
   `;
   return send(params.to, "Bienvenido a Fintrk", wrapper("Bienvenido a Fintrk", body, {
     label: "Abrir la app",
-    href: "https://fintrk.app/dashboard",
+    href: appUrl("/dashboard"),
   }));
 }
 
@@ -91,7 +92,7 @@ export async function sendStreakMilestoneEmail(params: { to: string; streak: num
   `;
   return send(params.to, `${params.streak} días de racha — bien hecho`, wrapper(`${params.streak} días seguidos`, body, {
     label: "Ver tu progreso",
-    href: "https://fintrk.app/achievements",
+    href: appUrl("/achievements"),
   }));
 }
 
@@ -115,6 +116,6 @@ export async function sendWeeklyRecapEmail(params: {
   `;
   return send(params.to, "Tu semana en Fintrk", wrapper("Tu semana en Fintrk", body, {
     label: "Ver el detalle",
-    href: "https://fintrk.app/insights",
+    href: appUrl("/insights"),
   }));
 }

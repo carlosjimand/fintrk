@@ -34,6 +34,7 @@ In Vercel **Settings → Environment Variables**, add at minimum:
 | `NEXT_PUBLIC_OWNER_LOCATION` | Your jurisdiction (city, country) |
 | `NEXT_PUBLIC_OWNER_EMAIL` | Privacy contact email |
 | `NEXT_PUBLIC_SUPPORT_EMAIL` | Support contact email |
+| `NEXT_PUBLIC_APP_URL` | Public app origin for metadata and email links |
 
 Optional:
 

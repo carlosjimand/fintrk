@@ -11,7 +11,26 @@ const withSerwist = withSerwistInit({
   disable: isDev,
 });
 
+const csp = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+  "frame-src 'none'",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://cdnjs.cloudflare.com`,
+  "worker-src 'self' blob: https://cdnjs.cloudflare.com",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob:",
+  "connect-src 'self' https://cdnjs.cloudflare.com",
+  "font-src 'self'",
+  "manifest-src 'self'",
+  ...(isDev ? [] : ["upgrade-insecure-requests"]),
+].join("; ");
+
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
+  productionBrowserSourceMaps: false,
   serverExternalPackages: ["pdf-parse", "jsonwebtoken"],
   turbopack: {},
   headers: async () => [
@@ -20,19 +39,22 @@ const nextConfig: NextConfig = {
       headers: [
         { key: "X-Frame-Options", value: "DENY" },
         { key: "X-Content-Type-Options", value: "nosniff" },
-        { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-        { key: "X-DNS-Prefetch-Control", value: "on" },
-        { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+        { key: "Referrer-Policy", value: "no-referrer" },
+        { key: "X-DNS-Prefetch-Control", value: "off" },
+        { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
+        { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+        { key: "Origin-Agent-Cluster", value: "?1" },
+        {
+          key: "Permissions-Policy",
+          value: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()",
+        },
         {
           key: "Strict-Transport-Security",
           value: "max-age=63072000; includeSubDomains; preload",
         },
-        // CSP — if you fork this project under a different domain, edit the
-        // connect-src directive to include your own origin(s).
         {
           key: "Content-Security-Policy",
-          value:
-            "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; worker-src 'self' blob: https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://api.openai.com https://cdnjs.cloudflare.com; font-src 'self'; frame-ancestors 'none';",
+          value: csp,
         },
       ],
     },

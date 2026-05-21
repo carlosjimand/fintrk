@@ -85,9 +85,9 @@ self.addEventListener("notificationclick", (event) => {
 
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
-      // Focus existing window if open
+      // Focus an existing app window if one is already open.
       for (const client of clients) {
-        if (client.url.includes("fintrk.app") && "focus" in client) {
+        if (new URL(client.url).origin === self.location.origin && "focus" in client) {
           client.focus();
           client.navigate(url);
           return;

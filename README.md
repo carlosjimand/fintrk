@@ -2,13 +2,10 @@
 
 > Drop any bank statement — PDF, CSV or XLSX from 100+ banks — and the AI categorizes every transaction. Self-hostable. Your data stays in your Postgres.
 
-[![CI](https://github.com/antoriv123/fintrk/actions/workflows/ci.yml/badge.svg)](https://github.com/antoriv123/fintrk/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-336791)](https://neon.tech)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-336791)](https://www.postgresql.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6)](https://www.typescriptlang.org)
-
-**Live demo:** [fintrk.app](https://fintrk.app) · **Status:** v0.1.0 alpha, used in production since April 2026.
 
 Self-hosted personal finance app built on Next.js 16 + PostgreSQL + OpenAI. MIT-licensed.
 
@@ -27,7 +24,7 @@ Self-hosted personal finance app built on Next.js 16 + PostgreSQL + OpenAI. MIT-
 | Layer | Tech |
 | --- | --- |
 | Framework | Next.js 16 (App Router) + React 19 |
-| Database | PostgreSQL via [`@neondatabase/serverless`](https://neon.tech) (raw SQL — no Prisma) |
+| Database | PostgreSQL via `@neondatabase/serverless` (raw SQL — no Prisma) |
 | Auth | bcrypt + JWT (HTTP-only cookies) |
 | AI | OpenAI (vision + text) |
 | Email | Resend (optional) |
@@ -69,6 +66,7 @@ See [`.env.example`](.env.example) for the full list. Minimum required:
 | `NEXT_PUBLIC_OWNER_LOCATION` | Jurisdiction for terms |
 | `NEXT_PUBLIC_OWNER_EMAIL` | Privacy contact |
 | `NEXT_PUBLIC_SUPPORT_EMAIL` | Support contact |
+| `NEXT_PUBLIC_APP_URL` | Public app origin used in metadata and email links |
 
 ## Schema
 

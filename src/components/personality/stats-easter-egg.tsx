@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X } from "lucide-react";
 import { Lupo } from "@/components/personality/lupo";
@@ -24,23 +24,17 @@ interface Props {
 export function StatsEasterEgg({ open, onClose, stats }: Props) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const t = useT() as (key: any) => string;
-  // Re-genera funFact solo en cada apertura. Usamos un ref como semilla
-  // que solo cambia cuando open transiciona false -> true.
-  const seedRef = useRef(0);
-  const lastOpenRef = useRef(false);
-  if (open && !lastOpenRef.current) {
-    seedRef.current = Math.random();
-  }
-  lastOpenRef.current = open;
-  const funFact = useMemo(() => {
+  const [funFact, setFunFact] = useState("");
+
+  useEffect(() => {
+    if (!open) return;
     const pool = [
       t("statsFunFact1"),
       t("statsFunFact2"),
       t("statsFunFact3"),
       t("statsFunFact4"),
     ];
-    return pool[Math.floor(seedRef.current * pool.length) % pool.length];
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- queremos recomputar cuando seedRef cambia (al abrir)
+    setFunFact(pool[Math.floor(Math.random() * pool.length) % pool.length]);
   }, [open, t]);
 
   return (

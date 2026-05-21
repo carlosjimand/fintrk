@@ -10,10 +10,6 @@ description = "Allowlist for safe placeholders and public values"
 # Files that contain explicit placeholders or example values.
 paths = [
   '''^\.env\.example$''',
-  '''^README\.md$''',
-  '''^SECURITY\.md$''',
-  '''^docs/.*\.md$''',
-  '''^\.github/.*''',
   '''^.*\.test\.(ts|tsx|js)$''',
   '''^src/.+/__tests__/.*''',
 ]

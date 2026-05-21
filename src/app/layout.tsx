@@ -6,6 +6,7 @@ import { Providers } from "@/components/providers";
 import { AppShell } from "@/components/layout/app-shell";
 import { Inter, Outfit } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { SITE_URL } from "@/lib/site-url";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-display" });
@@ -13,11 +14,11 @@ const outfit = Outfit({ subsets: ["latin"], variable: "--font-display" });
 export const metadata: Metadata = {
   title: "fintrk — Tu dinero, claro",
   description: "Controla tus finanzas con IA. Importa extractos, escanea recibos y la IA categoriza todo.",
-  metadataBase: new URL("https://fintrk.app"),
+  metadataBase: new URL(SITE_URL),
   openGraph: {
     title: "fintrk — Tu dinero, claro",
     description: "Controla tus finanzas con IA. Importa extractos y la IA categoriza todo automáticamente.",
-    url: "https://fintrk.app",
+    url: SITE_URL,
     siteName: "fintrk",
     images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "fintrk — Tu dinero, claro" }],
     locale: "es_ES",
