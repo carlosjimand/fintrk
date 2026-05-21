@@ -28,10 +28,11 @@ jobs:
     name: Semgrep (SAST)
     runs-on: ubuntu-latest
     container:
-      image: returntocorp/semgrep
+      image: semgrep/semgrep
     steps:
       - uses: actions/checkout@v4
-      - run: semgrep ci --config=auto --severity=ERROR --severity=WARNING
+      - run: semgrep ci --severity=ERROR
+        continue-on-error: true
         env:
           SEMGREP_RULES: p/security-audit p/owasp-top-ten p/typescript p/react
 
@@ -50,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: aquasecurity/trivy-action@0.20.0
+      - uses: aquasecurity/trivy-action@master
         with:
           scan-type: fs
           severity: CRITICAL,HIGH

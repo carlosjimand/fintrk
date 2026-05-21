@@ -42,6 +42,7 @@ Re-running is safe (statements use `CREATE TABLE IF NOT EXISTS`).
 | `streaks` | Consecutive checkin streak per user |
 | `apple_pay_tokens` | Tokens used by the Apple Pay iOS Shortcut ingest endpoint |
 | `apple_pay_imports` | Audit log of Apple Pay imports |
+| `push_subscriptions` | Browser/web push notification endpoints |
 
 All user-data tables include `user_id` as the multi-tenancy key. RLS is not enabled at the DB level; isolation is enforced at the application layer (`@/lib/get-user-id`).
 

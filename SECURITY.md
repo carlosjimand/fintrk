@@ -6,7 +6,7 @@ Please do NOT open a public GitHub issue for security vulnerabilities.
 
 Use GitHub's **private vulnerability reporting** instead: go to the [Security tab](https://github.com/antoriv123/fintrk/security) and click **Report a vulnerability**. We aim to acknowledge reports within 72 hours.
 
-If private reporting is unavailable, email the maintainer (address in the repo's `package.json` `repository` URL → contact via GitHub profile).
+If private reporting is unavailable for any reason, open a [GitHub Discussion](https://github.com/antoriv123/fintrk/discussions) marked as private, or contact the maintainer via the [@antoriv123](https://github.com/antoriv123) GitHub profile.
 
 When reporting, please include:
 

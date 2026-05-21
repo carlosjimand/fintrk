@@ -65,7 +65,11 @@ Or push to `main` and Vercel auto-deploys.
 
 ## 6. First user
 
-Open your deployment URL and use `/register` to create the first account. The first registered user is granted `role = "admin"` (see `schema.sql`).
+Open your deployment URL and use `/register` to create your account. All new users start with `role = "user"`. To promote yourself to admin (required to access `/admin`), run this once against your database:
+
+```sql
+UPDATE users SET role = 'admin' WHERE email = 'you@example.com';
+```
 
 ## Troubleshooting
 

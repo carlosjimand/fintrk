@@ -1,13 +1,16 @@
 # Fintrk
 
-> Personal finance tracker with AI-assisted categorization.
+> Drop any bank statement — PDF, CSV or XLSX from 100+ banks — and the AI categorizes every transaction. Self-hostable. Your data stays in your Postgres.
 
+[![CI](https://github.com/antoriv123/fintrk/actions/workflows/ci.yml/badge.svg)](https://github.com/antoriv123/fintrk/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-336791)](https://neon.tech)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6)](https://www.typescriptlang.org)
 
-Fintrk is a self-hostable personal finance app: import bank statements, let AI categorize transactions, track budgets, and see where your money goes. Web-only edition (Next.js 16 + PostgreSQL + OpenAI), MIT-licensed.
+**Live demo:** [fintrk.app](https://fintrk.app) · **Status:** v0.1.0 alpha, used in production since April 2026.
+
+Self-hosted personal finance app built on Next.js 16 + PostgreSQL + OpenAI. MIT-licensed.
 
 ## What it does
 
@@ -41,8 +44,7 @@ bun install   # or: npm install
 
 # 2. Configure environment
 cp .env.example .env.local
-# Edit .env.local — at minimum: DATABASE_URL, JWT_SECRET, CRON_SECRET, OPENAI_API_KEY,
-# NEXT_PUBLIC_OWNER_NAME, NEXT_PUBLIC_OWNER_LOCATION
+# Edit .env.local — see the table below for the 8 required values.
 
 # 3. Create a Neon database (or any PostgreSQL 15+) and run the schema
 psql "$DATABASE_URL" < src/lib/schema.sql
