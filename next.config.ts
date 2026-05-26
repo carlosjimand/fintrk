@@ -23,7 +23,7 @@ const csp = [
   "worker-src 'self' blob: https://cdnjs.cloudflare.com",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
-  "connect-src 'self' https://cdnjs.cloudflare.com",
+  "connect-src 'self' https://cdnjs.cloudflare.com https://vitals.vercel-insights.com",
   "font-src 'self'",
   "manifest-src 'self'",
   ...(isDev ? [] : ["upgrade-insecure-requests"]),
