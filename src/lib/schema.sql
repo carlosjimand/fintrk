@@ -94,12 +94,15 @@ CREATE TABLE IF NOT EXISTS accounts (
   is_active INTEGER NOT NULL DEFAULT 1,
   annual_interest_rate DOUBLE PRECISION DEFAULT 0,
   interest_payment_frequency TEXT DEFAULT 'monthly',
+  image_path TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(user_id, slug)
 );
 
 ALTER TABLE accounts ADD COLUMN IF NOT EXISTS interest_payment_frequency TEXT DEFAULT 'monthly';
 ALTER TABLE accounts ADD COLUMN IF NOT EXISTS scope TEXT NOT NULL DEFAULT 'personal';
+ALTER TABLE accounts ADD COLUMN IF NOT EXISTS image_path TEXT;
+ALTER TABLE accounts ADD COLUMN IF NOT EXISTS scope_label TEXT;
 
 CREATE TABLE IF NOT EXISTS savings_goals (
   id SERIAL PRIMARY KEY,

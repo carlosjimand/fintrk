@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { motion } from "motion/react";
-import { ChevronDown, ChevronRight, Plus, AlertCircle, Wallet, TrendingUp, Upload } from "lucide-react";
+import { ChevronDown, ChevronRight, Plus, AlertCircle, Wallet, TrendingUp, Upload, Pencil } from "lucide-react";
 import { FintrkLogo } from "@/components/fintrk-logo";
 import { prefersReducedMotion } from "@/lib/premium/motion";
 import { getCurrencySymbol } from "@/lib/currency";
@@ -51,6 +51,7 @@ interface Account {
   interest_payment_frequency: InterestPaymentFrequency | null;
   scope: string;
   scope_label: string | null;
+  image_path?: string | null;
   created_at: string;
 }
 
@@ -76,7 +77,14 @@ function fmtCompact(amount: number, currency?: string | null, localeCode = "es-E
   return `${symbol}${formatted}`;
 }
 
-function AccountIcon({ name, color, slug }: { name: string; color: string; slug?: string }) {
+function AccountIcon({ name, color, slug, imagePath }: { name: string; color: string; slug?: string; imagePath?: string | null }) {
+  if (imagePath) {
+    return (
+      <div className="w-11 h-11 shrink-0 rounded-xl overflow-hidden shadow-lg border border-border/50 bg-background/50 flex items-center justify-center">
+        <img src={imagePath} alt={name} className="w-full h-full object-cover" />
+      </div>
+    );
+  }
   const bankSlug = slug ?? name.toLowerCase().replace(/\s+/g, "");
   if (BANK_LOGOS[bankSlug]) {
     return <BankLogo bank={bankSlug} size={44} className="shrink-0 rounded-xl shadow-lg" />;
@@ -115,7 +123,9 @@ function AccountCard({
   const [editInterestRate, setEditInterestRate] = useState(account.annual_interest_rate ? String(Math.round(account.annual_interest_rate * 10000) / 100) : "");
   const [editInterestFreq, setEditInterestFreq] = useState<InterestPaymentFrequency>(account.interest_payment_frequency ?? "monthly");
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const t = useT();
   const localeCode = useLocaleCode();
   const fmtC = (amount: number, currency = "EUR") => fmtCompact(amount, currency, localeCode);
@@ -184,6 +194,44 @@ function AccountCard({
     onRefresh();
   }
 
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Validate size (1MB max)
+    if (file.size > 1024 * 1024) {
+      const { toast } = await import("sonner");
+      toast.error("La imagen no debe superar 1MB");
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await apiFetch(`/api/accounts/${account.id}/image`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Error al subir la imagen");
+      }
+
+      const { toast } = await import("sonner");
+      toast.success("Imagen de la cuenta actualizada");
+      await onRefresh();
+    } catch (error: any) {
+      const { toast } = await import("sonner");
+      toast.error(error.message);
+    } finally {
+      setUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
   return (
     <div
       className="rounded-2xl overflow-hidden transition-all duration-300"
@@ -199,7 +247,32 @@ function AccountCard({
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <AccountIcon name={account.name} color={color} slug={account.slug} />
+            <div className="relative flex items-center justify-center w-11 h-11">
+              <AccountIcon name={account.name} color={color} slug={account.slug} imagePath={account.image_path} />
+              {editMode && (
+                <div 
+                  className={`absolute inset-0 bg-black/40 flex items-center justify-center cursor-pointer transition-colors hover:bg-black/50 ${account.image_path || BANK_LOGOS[account.slug ?? account.name.toLowerCase().replace(/\\s+/g, "")] ? "rounded-xl" : "rounded-full"}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    fileInputRef.current?.click();
+                  }}
+                >
+                  {uploadingImage ? (
+                    <div className="w-4 h-4 border-2 border-white/80 border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Pencil size={18} className="text-white drop-shadow-md" />
+                  )}
+                </div>
+              )}
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                className="hidden" 
+                accept="image/jpeg, image/png"
+                onChange={handleImageUpload}
+              />
+            </div>
             <div>
               <div className="font-semibold text-[15px]">{account.name}</div>
               {(account.annual_interest_rate ?? 0) > 0 && (

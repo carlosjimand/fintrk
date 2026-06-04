@@ -18,6 +18,7 @@ interface AccountRow {
   annual_interest_rate: number;
   interest_payment_frequency: InterestPaymentFrequency | null;
   scope: string;
+  image_path?: string | null;
   created_at: string;
 }
 
