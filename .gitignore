@@ -66,3 +66,4 @@ public/sw.js
 # Internal docs / superpowers brainstorm sessions
 /.superpowers/
 /docs/superpowers/
+.env*
